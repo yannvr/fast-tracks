@@ -9,4 +9,4 @@ stream
 mytracks
 myfavourites
 
-Only streaming content directives for now but really. Get invovled in any way
+Only streaming content directives for now because really, it's about finding a track fast without scrolling
