@@ -106,7 +106,7 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConf
     };
 
 
-    this.getUserTracks = function (UserId, limit) {
+    this.getMyTracks = function (UserId, limit) {
         var deferred = $q.defer();
 
         limit = limit || 100;
@@ -120,6 +120,31 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConf
                         mytrack.oEmbed = oEmbed;
                         mytrack.oEmbed.html = $sce.trustAsHtml(oEmbed.html);
                         $rootScope.$broadcast('mytracksresolved', {data: mytrack});
+
+                    });
+
+                });
+            }
+        });
+
+        return deferred.promise;
+    };
+
+    this.getMyFavourites = function (UserId, limit) {
+        var deferred = $q.defer();
+
+        limit = limit || 100;
+        var url = '/users/' + UserId + '/favorites';
+        SC.get(url, {limit: limit}, function (response) {
+            if (response.error) {
+                deferred.reject(new Error(response));
+            } else {
+//                debugger;
+                response.forEach(function(mytrack) {
+                    SC.oEmbed(mytrack.permalink_url, { auto_play: false }, function (oEmbed) {
+                        mytrack.oEmbed = oEmbed;
+                        mytrack.oEmbed.html = $sce.trustAsHtml(oEmbed.html);
+                        $rootScope.$broadcast('myfavouritesresolved', {data: mytrack});
 
                     });
 

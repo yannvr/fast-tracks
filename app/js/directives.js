@@ -39,12 +39,30 @@ directives.directive('mytracks', function (SoundCloud) {
         link: function(scope, elt, attrs) {
             scope.mytracks = [];
             scope.$on('SCinitComplete', function(e, data) {
-                SoundCloud.getUserTracks(data.data.id);
+                SoundCloud.getMyTracks(data.data.id);
             });
 
             scope.$on('mytracksresolved', function(e, data) {
                 scope.mytracks.push(data.data);
                 scope.$apply();             //TODO: Well..
+            });
+        }
+    };
+});
+
+directives.directive('myfavourites', function (SoundCloud) {
+    return {
+        restrict: 'AE',
+        templateUrl: 'partials/myfavourites.html',
+        link: function(scope, elt, attrs) {
+            scope.myfavourites = [];
+            scope.$on('SCinitComplete', function(e, data) {
+                SoundCloud.getMyFavourites(data.data.id, 10);
+            });
+
+            scope.$on('myfavouritesresolved', function(e, data) {
+                scope.myfavourites.push(data.data);
+                scope.$apply();
             });
         }
     };
