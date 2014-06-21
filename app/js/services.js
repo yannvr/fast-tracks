@@ -7,7 +7,7 @@ var SCService = angular.module('fastTracks.services', []).
         REDIRECT_URI: 'http://2.222.173.36/home.html'});
 //  value('version', '0.1').
 
-SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', 'SCAppConfig', function ($http, $rootScope, $q, SCAppConfig) {
+SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConfig', function ($http, $rootScope, $q, $sce, SCAppConfig) {
 
     var SCData = {followings: [], followingsTracks: []},
         that = this,
@@ -30,8 +30,8 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', 'SCAppConfig', fun
                 var url = 'https://api.soundcloud.com/me.json?oauth_token=' + token;
                 $http({method: 'GET', url: url}).
                     success(function (data, status, headers, config) {
-//                        console.log('data: ' + data);
                         SCData.me = data;
+                        //$rootScope.$broadcast('SCinitComplete', {data: data});
                         that.getAllFollowings().then(function () {
                             that.getLastFollowingsTracks();
                         })
@@ -41,8 +41,6 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', 'SCAppConfig', fun
                     });
             }
         });
-
-
     };
 
     this.init = function () {
@@ -74,11 +72,8 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', 'SCAppConfig', fun
                         SC.get(url, { 'created_at[from]': fromDate, 'created_at[to]': toDate}, function (response) {
 
                             if (response.length) {
-                                $rootScope.$apply(function () {
-                                        SCData.followingsTracks = SCData.followingsTracks.concat(response);
-                                        console.log(following.username + ' got ' + response.length + ' tracks');
-                                    }
-                                );
+                                SCData.followingsTracks = SCData.followingsTracks.concat(response);
+                                console.log(following.username + ' got ' + response.length + ' tracks');
                             }
                         });
                     })
@@ -87,15 +82,23 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', 'SCAppConfig', fun
             return SCData.followingsTracks;
         } else {
             SCData.followings.forEach(function (following) {
-                if (indexs.followings.tracksRequested.indexOf(following.id)===-1) {
+                if (indexs.followings.tracksRequested.indexOf(following.id) === -1) {
                     var url = '/users/' + following.id + '/tracks';
                     SC.get(url, { 'created_at[from]': fromDate, 'created_at[to]': toDate}, function (response) {
                         if (response.length) {
-                            $rootScope.$apply(function () {
-                                    SCData.followingsTracks = SCData.followingsTracks.concat(response);
-                                    console.log(following.username + ' got ' + response.length + ' tracks');
-                                }
-                            );
+                            console.log(following.username + ' got ' + response.length + ' tracks');
+                            response.forEach(function (track, i) {
+                                SC.oEmbed(track.permalink_url, { auto_play: false }, function (oEmbed) {
+
+                                    track.oEmbed = oEmbed;
+                                    track.oEmbed.html = $sce.trustAsHtml(oEmbed.html);
+                                    if (i === response.length - 1) {
+                                        $rootScope.$apply(function () {
+                                            SCData.followingsTracks = SCData.followingsTracks.concat(track);
+                                        });
+                                    }
+                                });
+                            });
                         }
                     });
                     indexs.followings.tracksRequested.push(following.id);

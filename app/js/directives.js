@@ -2,10 +2,11 @@
 
 /* Directives */
 
+var directives = angular.module('fastTracks.directives', []);
 
-angular.module('myApp.directives', []).
-  directive('appVersion', ['version', function(version) {
-    return function(scope, elm, attrs) {
-      elm.text(version);
+directives.directive('lasttracks', function() {
+    return {
+        restrict: 'AE',
+        templateUrl: 'partials/stream.html'
     };
-  }]);
+});

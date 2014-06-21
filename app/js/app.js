@@ -6,7 +6,7 @@ angular.module('fastTracks', [
 //  'ngRoute',
 //  'fastTracks.filters',
   'fastTracks.services',
-//  'fastTracks.directives',
+  'fastTracks.directives',
   'fastTracks.controllers'
 ]);
 /*config(['$routeProvider', function($routeProvider) {

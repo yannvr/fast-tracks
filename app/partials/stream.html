@@ -1,0 +1,4 @@
+<h1>Last tracks</h1>
+<ul class="stream">
+    <li ng-repeat="track in SCData.followingsTracks track by track.id"><span ng-bind-html="track.oEmbed.html"></span></li>
+</ul>
