@@ -31,10 +31,10 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConf
                 $http({method: 'GET', url: url}).
                     success(function (data, status, headers, config) {
                         SCData.me = data;
-                        //$rootScope.$broadcast('SCinitComplete', {data: data});
-                        that.getAllFollowings().then(function () {
-                            that.getLastFollowingsTracks();
-                        })
+                        $rootScope.$broadcast('SCinitComplete', {data: data});
+//                        that.getAllFollowings().then(function () {
+//                            that.getLastFollowingsTracks();
+//                        })
                     }).
                     error(function (data, status, headers, config) {
                         console.error("failed to get: " + url)
@@ -44,7 +44,6 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConf
     };
 
     this.init = function () {
-//        console.log('init SC');
         SC.initialize({
             client_id: SCAppConfig.CLIENT_ID,
             redirect_uri: SCAppConfig.REDIRECT_URI
@@ -93,9 +92,8 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConf
                                     track.oEmbed = oEmbed;
                                     track.oEmbed.html = $sce.trustAsHtml(oEmbed.html);
                                     if (i === response.length - 1) {
-                                        $rootScope.$apply(function () {
-                                            SCData.followingsTracks = SCData.followingsTracks.concat(track);
-                                        });
+                                        SCData.followingsTracks = SCData.followingsTracks.concat(track);
+                                        $rootScope.$broadcast('streamComplete', {data: track});
                                     }
                                 });
                             });
@@ -105,16 +103,31 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConf
                 }
             })
         }
-
     };
 
 
-    this.getUserTracks = function (UserId, storeObjName, limit) {
+    this.getUserTracks = function (UserId, limit) {
+        var deferred = $q.defer();
+
         limit = limit || 100;
-        var url = '/tracks/' + UserId;
+        var url = '/users/' + UserId + '/tracks';
         SC.get(url, {limit: limit}, function (response) {
-            SCData[storeObjName] = {tracks: response};
+            if (response.error) {
+                deferred.reject(new Error(response));
+            } else {
+                response.forEach(function(mytrack) {
+                    SC.oEmbed(mytrack.permalink_url, { auto_play: false }, function (oEmbed) {
+                        mytrack.oEmbed = oEmbed;
+                        mytrack.oEmbed.html = $sce.trustAsHtml(oEmbed.html);
+                        $rootScope.$broadcast('mytracksresolved', {data: mytrack});
+
+                    });
+
+                });
+            }
         });
+
+        return deferred.promise;
     };
 
     this.getFollowings = function () {
