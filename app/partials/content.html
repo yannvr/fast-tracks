@@ -1,0 +1,8 @@
+<div class="connect" ng-if="notConnected">
+    Please connect to activate Fast Tracks
+    <img src="../img/btn-connect-l.png" id="connectBtn">
+</div>
+
+<ul class="tracks" ng-if="!notConnected">
+    <li ng-repeat="track in tracks track by track.id"><span ng-bind-html="track.oEmbed.html"></span></li>
+</ul>

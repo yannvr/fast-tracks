@@ -4,66 +4,57 @@
 
 var directives = angular.module('fastTracks.directives', []);
 
-directives.directive('stream', function (SoundCloud) {
+directives.directive('content', function (SoundCloud) {
     return {
-        restrict: 'AE',
-        templateUrl: 'partials/stream.html',
-        link: function(scope, elt, attrs) {
-            scope.lastTracks = [];
-            scope.$on('SCinitComplete', function() {
+        restrict: 'E',
+        templateUrl: 'partials/content.html',
+        scope: {
+            type: '@',  // Pass the type of tracks to retrieve
+            limit: '@'  // Maximum number of tracks to retrieve
+        },
+        link: function (scope, elt, attrs) {
+            scope.tracks = [];
+            scope.notConnected = false;
+            scope.$on('SCinitComplete', function (e, data) {
+                if (scope.type === 'stream') {
                     SoundCloud.getAllFollowings().then(function () {
-                    SoundCloud.getLastFollowingsTracks();
-                })
+                        SoundCloud.getLastFollowingsTracks();
+                    })
+                } else if (scope.type === 'mytracks') {
+                    SoundCloud.getMyTracks(data.data.id, scope.limit);
+                } else if (scope.type === 'myfavourites') {
+                    SoundCloud.getMyFavourites(data.data.id, scope.limit);
+                }
             });
 
-            scope.$on('streamComplete', function(e, data) {
-                scope.lastTracks.push(data.data);
-            });
-        }
-
-//        controller: function (SoundCloud, $scope) {
-//            $.on('SCinitComplete', function() {
-//                SoundCloud.getAllFollowings().then(function () {
-//                    SoundCloud.getLastFollowingsTracks();
-//                })
-//            });
-//
-//        }
-    };
-});
-
-directives.directive('mytracks', function (SoundCloud) {
-    return {
-        restrict: 'AE',
-        templateUrl: 'partials/mytracks.html',
-        link: function(scope, elt, attrs) {
-            scope.mytracks = [];
-            scope.$on('SCinitComplete', function(e, data) {
-                SoundCloud.getMyTracks(data.data.id);
+            scope.$on('streamComplete', function (e, data) {
+                scope.tracks.push(data.data);
+                scope.$apply();
             });
 
-            scope.$on('mytracksresolved', function(e, data) {
-                scope.mytracks.push(data.data);
-                scope.$apply();             //TODO: Well..
-            });
-        }
-    };
-});
-
-directives.directive('myfavourites', function (SoundCloud) {
-    return {
-        restrict: 'AE',
-        templateUrl: 'partials/myfavourites.html',
-        link: function(scope, elt, attrs) {
-            scope.myfavourites = [];
-            scope.$on('SCinitComplete', function(e, data) {
-                SoundCloud.getMyFavourites(data.data.id, 10);
+            scope.$on('mytracksresolved', function (e, data) {
+                scope.tracks.push(data.data);
+                scope.$apply();             // External change
             });
 
-            scope.$on('myfavouritesresolved', function(e, data) {
-                scope.myfavourites.push(data.data);
+            scope.$on('myfavouritesresolved', function (e, data) {
+                scope.tracks.push(data.data);
+                scope.$apply();
+            });
+
+            scope.$on('notConnected', function(e, data) {
+                scope.notConnected = true;
+                scope.$apply();
+                elt[0].querySelector('#connectBtn').addEventListener('click', function(e) {
+                SoundCloud.connect();
+                });
+            });
+
+            scope.$on('connected', function (e, data) {
+                scope.notConnected = false;
                 scope.$apply();
             });
         }
-    };
+
+    }
 });

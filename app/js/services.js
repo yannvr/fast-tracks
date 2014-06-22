@@ -4,7 +4,7 @@
 
 var SCService = angular.module('fastTracks.services', []).
     constant('SCAppConfig', {CLIENT_ID: '658e6daa1a76c7f3cb7f0b495a6830db',
-        REDIRECT_URI: 'http://2.222.173.36/home.html'});
+        REDIRECT_URI: 'http://2.221.195.103/home.html'});
 //  value('version', '0.1').
 
 SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConfig', function ($http, $rootScope, $q, $sce, SCAppConfig) {
@@ -25,8 +25,9 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConf
         localforage.getItem('accessToken', function (token) {
 
             if (!token) {
-                that.connect();
+                $rootScope.$broadcast('notConnected');
             } else {
+                $rootScope.$broadcast('connected');
                 var url = 'https://api.soundcloud.com/me.json?oauth_token=' + token;
                 $http({method: 'GET', url: url}).
                     success(function (data, status, headers, config) {
