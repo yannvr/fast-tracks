@@ -3,6 +3,10 @@
     <img src="../img/btn-connect-l.png" id="connectBtn">
 </div>
 
+<!--<ul class="tracks" ng-if="!notConnected">-->
+    <!--<li ng-repeat="track in tracks track by track.id" class="embedTrack"><span ng-bind-html="track.oEmbed.html"></span></li>-->
+<!--</ul>-->
+
 <ul class="tracks" ng-if="!notConnected">
-    <li ng-repeat="track in tracks track by track.id"><span ng-bind-html="track.oEmbed.html"></span></li>
+    <li ng-repeat="track in tracks"><a ng-if="track.streamable" ng-click="playTrack(track)">{{track.title}}</span></li>
 </ul>

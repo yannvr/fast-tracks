@@ -9,11 +9,11 @@ var SCService = angular.module('fastTracks.services', []).
 
 SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConfig', function ($http, $rootScope, $q, $sce, SCAppConfig) {
 
-    var SCData = {followings: [], followingsTracks: []},
+    var SCData = {followings: [], followingsTracks: [], myfavourites: []},
         that = this,
-        indexs = {favorite: {page: 0, track: 0},
+        indexs = {favorites: {page: 0, track: 0, nb: 0},
             followings: {page: 0, nb: 0, i: 0, tracksRequested: []},
-            track: {page: 0, track: 0}},
+            tracks: {page: 0, track: 0, nb:0}},
         TodayFollowerTracksFilter = function () {
             SCData['TodayFollowerTracksFilter'].tracks.filter(function (track) {
                 return track
@@ -109,7 +109,7 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConf
 
     this.getMyTracks = function (UserId, limit) {
         var deferred = $q.defer();
-
+        SCData.mytracks = [];
         limit = limit || 100;
         var url = '/users/' + UserId + '/tracks';
         SC.get(url, {limit: limit}, function (response) {
@@ -127,29 +127,74 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConf
                 });
             }
         });
+        return deferred.promise;
+    };
+
+    this.resolveTracks = function (tracks, limit) {
+        var deferred = $q.defer();
+
+        tracks.forEach(function(track) {
+            SC.oEmbed(track.permalink_url, { auto_play: false }, function (oEmbed) {
+                track.oEmbed = oEmbed;
+                track.oEmbed.html = $sce.trustAsHtml(oEmbed.html);
+                $rootScope.$broadcast('myfavouritesresolved', {data: track});
+            });   
+        });
 
         return deferred.promise;
     };
 
-    this.getMyFavourites = function (UserId, limit) {
+    this.getMyFavourites = function (UserId, params) {
         var deferred = $q.defer();
+//        SCData.myfavourites = [];
 
-        limit = limit || 100;
-        var url = '/users/' + UserId + '/favorites';
-        SC.get(url, {limit: limit}, function (response) {
-            if (response.error) {
-                deferred.reject(new Error(response));
+        var limit, url,
+            offset = params.offset || 0;
+
+        if (params.limit === 'nolimit') {
+            limit = 200;
+        } else {
+            limit = params.limit || 100;
+        }
+
+         url = '/users/' + UserId + '/favorites';
+        SC.get(url, {limit: limit, offset: offset}, function (response) {
+            indexs.favorites.nb += response.length;
+
+            if (response.errors) {
+                deferred.reject(new Error(response.errors));
             } else {
-//                debugger;
-                response.forEach(function(mytrack) {
-                    SC.oEmbed(mytrack.permalink_url, { auto_play: false }, function (oEmbed) {
-                        mytrack.oEmbed = oEmbed;
-                        mytrack.oEmbed.html = $sce.trustAsHtml(oEmbed.html);
-                        $rootScope.$broadcast('myfavouritesresolved', {data: mytrack});
-
-                    });
-
+                response = response.filter(function(r) {
+                    return r.id !== "undefined";
                 });
+
+                SCData.myfavourites = SCData.myfavourites.concat(response);
+
+                if (params.limit === 'nolimit' && indexs.favorites.nb < SCData.me.public_favorites_count) {
+                    that.getMyFavourites(UserId, {limit: 'nolimit', offset: indexs.favorites.nb});
+//                    debugger;
+//                    response = response.filter(function(resp)return ))
+                    $rootScope.$broadcast('trackListing', {data: response});
+                }
+                else {
+//                    debugger;
+                    $rootScope.$broadcast('alltracksretrieved', {data: SCData.myfavourites});
+//                    deferred.resolve(SCData.myfavourites);
+                    console.log('all tracks retrieved nb ' + SCData.myfavourites.length);
+                }
+//                debugger;
+                if (params.resolve === 'true') {
+                    response.forEach(function(mytrack) {
+                        SC.oEmbed(mytrack.permalink_url, { auto_play: false }, function (oEmbed) {
+                            mytrack.oEmbed = oEmbed;
+                            mytrack.oEmbed.html = $sce.trustAsHtml(oEmbed.html);
+                            SCData.myfavourites.push(mytrack);
+
+                            $rootScope.$broadcast('myfavouritesresolved', {data: mytrack});
+
+                        });
+                    });
+                }
             }
         });
 
@@ -166,12 +211,22 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConf
             if (response.error) {
                 deferred.reject(new Error(response));
             } else {
-                deferred.resolve(response)
+                deferred.resolve(response);
             }
         });
 
         return deferred.promise;
 
+    };
+
+    this.playStream = function (track_id) {
+        var deferred = $q.defer();
+
+        SC.stream("/tracks/"+track_id, function(sound){
+            deferred.resolve(sound);
+        });
+
+        return deferred.promise;
     };
 
     this.getAllFollowings = function () {
@@ -211,9 +266,12 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConf
      * @param track_url
      */
     this.embedTrack = function (track_url) {
-        SC.oEmbed(track_url, { auto_play: false }, function (oEmbed) {
-            return oEmbed;
+        var deferred = $q.defer();
+        SC.oEmbed(track_url, { auto_play: true, maxheight: 120, comments:false}, function (oEmbed) {
+            oEmbed.html = $sce.trustAsHtml(oEmbed.html);
+            deferred.resolve(oEmbed);
         });
+        return deferred.promise;
     };
 
     this.SCData = SCData;

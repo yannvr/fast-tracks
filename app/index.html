@@ -6,6 +6,7 @@
   <title>Fast Tracks</title>
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css">
   <link rel="stylesheet" href="bower_components/html5-boilerplate/css/normalize.css">
   <link rel="stylesheet" href="bower_components/html5-boilerplate/css/main.css">
   <link rel="stylesheet" href="css/app.css"/>
@@ -19,13 +20,20 @@
 
 
   <!--<content type="stream"></content>-->
-  <content type="mytracks" limit="5"></content>
-  <!--<content type="myfavourites" limit="10"></content>-->
+  <!--<content type="mytracks" limit="5"></content>-->
+  <div class="trackView">
+
+      <content type="myfavourites" limit="nolimit" resolve="false"></content>
+  </div>
+
+  <player></player>
 
   <!-- In production use:
   <script src="//ajax.googleapis.com/ajax/libs/angularjs/x.x.x/angular.min.js"></script>
   -->
   <script src="http://connect.soundcloud.com/sdk.js"></script>
+  <script src="bower_components/jquery/dist/jquery.min.js"></script>
+  <!--<script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>-->
   <script src="bower_components/moment/min/moment.min.js"></script>
   <script src="bower_components/angular/angular.js"></script>
   <script src="bower_components/localforage/dist/localforage.js"></script>
