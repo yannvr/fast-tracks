@@ -60,26 +60,19 @@ directives.directive('content', function (SoundCloud, $rootScope) {
                 scope.$evalAsync(function() {
                     scope.tracks.push(data.data);
                 });
-
-//                scope.$apply();
             });
 
-            scope.$on('trackResolved', function (e, data) {
+            scope.$on('trackResolved', function (e, track) {
                 scope.$evalAsync(function() {
-                    scope.tracks.push(data.data);
+                    scope.tracks.push(track);
                 });
-                console.log('track resolved')
-//                scope.$apply();             // External change
             });
 
             scope.playTrack = function (track) {
                  SoundCloud.playStream(track.id).then(function(sound) {
                      scope.sound = sound;
-//                     $rootScope.currentSound = sound;
-//                     $rootScope.$apply();
                      console.log('got sound ' + sound);
                      scope.$emit('trackLoad', {track: track, sound: sound});
-//                     scope.$apply();
                 });
             };
 
@@ -98,8 +91,17 @@ directives.directive('content', function (SoundCloud, $rootScope) {
             });
 
             scope.$on('connected', function (e, data) {
-                scope.notConnected = false;
-                scope.$apply();
+                scope.$evalAsync(function() {
+                    scope.notConnected = false;
+                });
+            });
+
+            scope.$on('trackViewClass', function (e, trackViewClass) {
+                $rootScope.$evalAsync(function() {
+                    $rootScope.trackViewClass = trackViewClass;
+                    scope.trackViewClass = trackViewClass;
+                    console.log('trackViewClass class set to ' + trackViewClass);
+                });
             });
         }
 
@@ -112,39 +114,10 @@ directives.directive('content', function (SoundCloud, $rootScope) {
             link: function(scope, elem, attrs) {
                 scope.$on('trackLoad', function (e, data) {
                     scope.track = data.track;
-                    SoundCloud.embedTrack(data.track.permalink_url).then(function (oEmbed) {
+                    SoundCloud.getEmbed(data.track, { auto_play: false, comments:false, maxheight: 120  }).then(function (oEmbed) {
                         scope.track.oEmbed = oEmbed;
                     });
                 })
             }
         }
     });
-
-//directives.directive('ngRepeatRange', function () {
-//    return {
-//        scope: { from: '=', to: '=', step: '=' },
-//
-//        link: function (scope, element, attrs) {
-//
-//            // returns an array with the range of numbers
-//            // you can use _.range instead if you use underscore
-//            function range(from, to, step) {
-//                var array = [];
-//                while (from + step <= to)
-//                    array[array.length] = from += step;
-//
-//                return array;
-//            }
-//
-//            // prepare range options
-//            var from = scope.from || 0;
-//            var step = scope.step || 1;
-//            var to   = scope.to   || attrs['ngRepeatRange'];
-//
-//            // get range of numbers, convert to the string and add ng-repeat
-//            var rangeString = range(from, to, step).join(',');
-//            element.attr('ng-repeat', 'n in [' + rangeString + ']');
-//            element.removeAttr('ngRepeatRange');
-//        }
-//    };
-//});

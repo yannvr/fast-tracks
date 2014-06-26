@@ -15,8 +15,11 @@
     <!--<li ng-repeat="track in tracks track by track.id" class="embedTrack"><span ng-bind-html="track.oEmbed.html"></span></li>-->
     <!--</ul>-->
 
-    <input type="text" id="search" ng-model="search" placeholder="Search..."/> in {{categorySelected}}
+    <input type="text" id="search" ng-model="search" placeholder="Search..."/>
     <ul class="tracks">
-        <li ng-repeat="track in tracks | filter:search track by track.id"><a ng-if="track.streamable" ng-click="playTrack(track)">{{track.title}}</span></li>
+        <li ng-repeat="track in tracks | filter:search track by track.id">
+            <span ng-bind-html="track.oEmbed.html" ng-if=" trackViewClass == 'wide' "></span>
+            <a ng-if="track.streamable" ng-click="playTrack(track)">{{track.title}}</a>
+        </li>
     </ul>
 </div>

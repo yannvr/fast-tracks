@@ -34,9 +34,6 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConf
                     success(function (data, status, headers, config) {
                         SCData.me = data;
                         $rootScope.$broadcast('SCinitComplete', {data: data});
-//                        that.getAllFollowings().then(function () {
-//                            that.getLastFollowingsTracks();
-//                        })
                     }).
                     error(function (data, status, headers, config) {
                         console.error("failed to get: " + url)
@@ -131,16 +128,23 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConf
         return deferred.promise;
     };
 
-    this.resolveTracks = function (tracks, limit) {
+    /**
+     * @desc embeds track via oembed (oembed.com).
+     *
+     * @param tracks
+     * @param http://developers.soundcloud.com/docs/api/reference#oembed
+     * @returns {promise}
+     */
+    this.getEmbed = function (track, oEmbedParams) {
         var deferred = $q.defer();
 
-        tracks.forEach(function(track) {
-            SC.oEmbed(track.permalink_url, { auto_play: false }, function (oEmbed) {
+//        tracks.forEach(function(track) {
+            SC.oEmbed(track.permalink_url, oEmbedParams, function (oEmbed) {
                 track.oEmbed = oEmbed;
                 track.oEmbed.html = $sce.trustAsHtml(oEmbed.html);
-                $rootScope.$broadcast('myfavouritesresolved', {data: track});
+                $rootScope.$broadcast('trackResolved', track);
             });   
-        });
+//        });
 
         return deferred.promise;
     };
@@ -148,6 +152,7 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConf
     this.getUserTracks = function (UserId, params) {
         var deferred = $q.defer(),
             limit, url, count,
+            resolve = false,
             offset = params.offset || 0;
 
         if (params.limit === 'nolimit') {
@@ -163,6 +168,13 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConf
             limit = params.limit || 100;
         }
 
+        if (count <= 10) {
+            resolve = true;
+            $rootScope.$broadcast('trackViewClass', 'wide');
+        } else {
+            $rootScope.$broadcast('trackViewClass', 'compact');
+        }
+
         url = '/users/' + UserId + '/' + params.category;
         SC.get(url, {limit: limit, offset: offset}, function (response) {
             if (response.errors) {
@@ -171,8 +183,9 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConf
                 params.nbTracks += response.length;
                 if (params.limit === 'nolimit' && params.nbTracks < count) {
 
-                    that.getUserTracks(UserId, {limit: 'nolimit', resolve: params.resolve, category: params.category, offset: params.nbTracks, nbTracks: params.nbTracks, tracksCollected: tracksCollected});
+                    that.getUserTracks(UserId, {limit: 'nolimit', resolve: resolve, category: params.category, offset: params.nbTracks, nbTracks: params.nbTracks, tracksCollected: tracksCollected});
                     if (params.category === 'favorites') {
+                        // Remove duplicates since SoundCloud allows for them =(
                         var uniqueArray = that.removeDuplicates(response, tracksCollected);
                         tracksCollected = tracksCollected.concat(uniqueArray);
                         $rootScope.$broadcast('trackListing', uniqueArray);
@@ -180,27 +193,13 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConf
                         $rootScope.$broadcast('trackListing', response);
                     }
                 } else {
-                    // Remove duplicates since SoundCloud allows for them =(
-//                    if (params.category === 'favorites') {
-//                        tracksCollected = that.removeDuplicates(tracksCollected);
-//                        indexs.favorites.nb = params.tracksCollected.length;
-//                    }
                     tracksCollected = [];
-
-//                    $rootScope.$broadcast('alltracksretrieved', {data: SCData.myfavourites});
-//                    console.log('all tracks retrieved nb ' + SCData.myfavourites.length);
                 }
 
-                if (params.resolve === 'true') {
-                    response.forEach(function(mytrack) {
-                        SC.oEmbed(mytrack.permalink_url, { auto_play: false }, function (oEmbed) {
-                            mytrack.oEmbed = oEmbed;
-                            mytrack.oEmbed.html = $sce.trustAsHtml(oEmbed.html);
-                            SCData.myfavourites.push(mytrack);
-
-                            $rootScope.$broadcast('trackResolved', {data: mytrack});
-
-                        });
+//                Small number of results resolved automatically
+                if (resolve) {
+                    response.forEach(function(track) {
+                        that.getEmbed(track, { auto_play: false, comments:false, maxheight: 140  })
                     });
                 }
             }
@@ -257,7 +256,6 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConf
 
         });
 
-
         return deferred.promise;
     };
 
@@ -267,19 +265,6 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConf
                 alert('Hello, ' + me.username);
             });
         });
-    };
-
-    /**
-     * @desc embedds track. Parameters http://developers.soundcloud.com/docs/api/reference#oembed
-     * @param track_url
-     */
-    this.embedTrack = function (track_url) {
-        var deferred = $q.defer();
-        SC.oEmbed(track_url, { auto_play: true, maxheight: 120, comments:false}, function (oEmbed) {
-            oEmbed.html = $sce.trustAsHtml(oEmbed.html);
-            deferred.resolve(oEmbed);
-        });
-        return deferred.promise;
     };
 
     this.removeDuplicates = function(array, mergedArray) {
