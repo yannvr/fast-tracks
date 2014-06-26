@@ -1,0 +1,16 @@
+<!doctype html>
+<html>
+<head>
+    <title>Fast Tracks Redir</title>
+    <script src="bower_components/localforage/dist/localforage.js"></script>
+
+    <script type="text/javascript">
+        debugger;
+        var accessToken = window.location.hash.split('&')[0].split('=')[1];
+        localforage.setItem('accessToken', accessToken).then(function() { window.close() });
+    </script>
+</head>
+<body>
+
+</body>
+</html>
