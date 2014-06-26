@@ -11,6 +11,7 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConf
 
     var SCData = {followings: [], followingsTracks: [], myfavourites: []},
         that = this,
+        tracksCollected = [],
         indexs = {favorites: {page: 0, track: 0, nb: 0},
             followings: {page: 0, nb: 0, i: 0, tracksRequested: []},
             tracks: {page: 0, track: 0, nb:0}},
@@ -144,45 +145,52 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConf
         return deferred.promise;
     };
 
-    this.getMyFavourites = function (UserId, params) {
-        var deferred = $q.defer();
-//        SCData.myfavourites = [];
-
-        var limit, url,
+    this.getUserTracks = function (UserId, params) {
+        var deferred = $q.defer(),
+            limit, url, count,
             offset = params.offset || 0;
 
         if (params.limit === 'nolimit') {
             limit = 200;
+            params.nbTracks = params.nbTracks || 0;
+            params.tracksCollected = params.tracksCollected || [];
+            if(params.category === 'favorites') {
+                count = SCData.me.public_favorites_count;
+            } else {
+                count = SCData.me.track_count;
+            }
         } else {
             limit = params.limit || 100;
         }
 
-         url = '/users/' + UserId + '/favorites';
+        url = '/users/' + UserId + '/' + params.category;
         SC.get(url, {limit: limit, offset: offset}, function (response) {
-            indexs.favorites.nb += response.length;
-
             if (response.errors) {
                 deferred.reject(new Error(response.errors));
             } else {
-                response = response.filter(function(r) {
-                    return r.id !== "undefined";
-                });
+                params.nbTracks += response.length;
+                if (params.limit === 'nolimit' && params.nbTracks < count) {
 
-                SCData.myfavourites = SCData.myfavourites.concat(response);
+                    that.getUserTracks(UserId, {limit: 'nolimit', resolve: params.resolve, category: params.category, offset: params.nbTracks, nbTracks: params.nbTracks, tracksCollected: tracksCollected});
+                    if (params.category === 'favorites') {
+                        var uniqueArray = that.removeDuplicates(response, tracksCollected);
+                        tracksCollected = tracksCollected.concat(uniqueArray);
+                        $rootScope.$broadcast('trackListing', uniqueArray);
+                    } else {
+                        $rootScope.$broadcast('trackListing', response);
+                    }
+                } else {
+                    // Remove duplicates since SoundCloud allows for them =(
+//                    if (params.category === 'favorites') {
+//                        tracksCollected = that.removeDuplicates(tracksCollected);
+//                        indexs.favorites.nb = params.tracksCollected.length;
+//                    }
+                    tracksCollected = [];
 
-                if (params.limit === 'nolimit' && indexs.favorites.nb < SCData.me.public_favorites_count) {
-                    that.getMyFavourites(UserId, {limit: 'nolimit', offset: indexs.favorites.nb});
-//                    debugger;
-//                    response = response.filter(function(resp)return ))
-                    $rootScope.$broadcast('trackListing', {data: response});
+//                    $rootScope.$broadcast('alltracksretrieved', {data: SCData.myfavourites});
+//                    console.log('all tracks retrieved nb ' + SCData.myfavourites.length);
                 }
-                else {
-//                    debugger;
-                    $rootScope.$broadcast('alltracksretrieved', {data: SCData.myfavourites});
-//                    deferred.resolve(SCData.myfavourites);
-                    console.log('all tracks retrieved nb ' + SCData.myfavourites.length);
-                }
-//                debugger;
+
                 if (params.resolve === 'true') {
                     response.forEach(function(mytrack) {
                         SC.oEmbed(mytrack.permalink_url, { auto_play: false }, function (oEmbed) {
@@ -190,7 +198,7 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConf
                             mytrack.oEmbed.html = $sce.trustAsHtml(oEmbed.html);
                             SCData.myfavourites.push(mytrack);
 
-                            $rootScope.$broadcast('myfavouritesresolved', {data: mytrack});
+                            $rootScope.$broadcast('trackResolved', {data: mytrack});
 
                         });
                     });
@@ -272,6 +280,27 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConf
             deferred.resolve(oEmbed);
         });
         return deferred.promise;
+    };
+
+    this.removeDuplicates = function(array, mergedArray) {
+        var uniqueArray = [],
+            track, i,
+            existingIds = [],
+            ids = [];
+
+        if (mergedArray) {
+            mergedArray.forEach(function(track) { existingIds.push(track.id)});
+        }
+
+        for (i = 0; i<array.length;i++) {
+            track = array[i];
+            if (ids.indexOf(track.id) === -1 && existingIds.indexOf(track.id) === -1) {
+                uniqueArray = uniqueArray.concat(track);
+                ids.push(track.id);
+            }
+        }
+
+        return uniqueArray;
     };
 
     this.SCData = SCData;

@@ -10,8 +10,15 @@ ul { list-style: none; }
   overflow-y: hidden;
 }
 
+.player {
+  position: fixed;
+  width: 100%;
+  bottom: -10px;
+}
+
 .tracks {
   height: 85vh;
+  margin: 0;
   display: -webkit-flex;
   display: flex;
   -webkit-align-items: center;
@@ -25,6 +32,7 @@ ul { list-style: none; }
 
   li {
     width: 20%;
+    border-bottom: 1px solid moccasin;
     .text-overflow();
   }
 }

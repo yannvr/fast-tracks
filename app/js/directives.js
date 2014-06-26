@@ -17,26 +17,59 @@ directives.directive('content', function (SoundCloud, $rootScope) {
             scope.tracks = [];
             scope.sound = undefined;
             scope.notConnected = false;
+            var SCDATA = {};
+
+            scope.options = [
+                { label: 'My likes', value: 'favorites' },
+                { label: 'My tracks', value: 'tracks' },
+                { label: 'Stream', value: 'stream' }
+            ];
+
+            scope.category = scope.options[1];
+
             scope.$on('SCinitComplete', function (e, data) {
-                if (scope.type === 'stream') {
+                SCDATA.me = data.data;
+                if (scope.category.value === 'stream') {
                     SoundCloud.getAllFollowings().then(function () {
                         SoundCloud.getLastFollowingsTracks();
                     })
-                } else if (scope.type === 'mytracks') {
-                    SoundCloud.getMyTracks(data.data.id, {limit: scope.limit, resolve: scope.resolve});
-                } else if (scope.type === 'myfavourites') {
-                    SoundCloud.getMyFavourites(data.data.id, {limit: scope.limit, resolve: scope.resolve});
+                } else if (scope.category.value === 'tracks') {
+                    SoundCloud.getUserTracks(SCDATA.me.id, {limit: scope.limit, resolve: 'true', category: scope.category.value});
+                } else if (scope.category.value === 'favorites') {
+                    SoundCloud.getUserTracks(SCDATA.me.id, {limit: scope.limit, resolve: 'false', category: scope.category.value});
                 }
             });
+            
+            scope.selectAction = function() {
+    //                scope.category = this.category.value;
+    //                scope.type = this.category.value;
+                scope.tracks = [];
+                if (this.category.value === 'stream') {
+                    SoundCloud.getAllFollowings().then(function () {
+                        SoundCloud.getLastFollowingsTracks();
+                    })
+                } else if (this.category.value === 'tracks') {
+                    SoundCloud.getUserTracks(SCDATA.me.id, {limit: 'nolimit', resolve: 'false', category: this.category.value});
+                } else if (this.category.value === 'favorites') {
+                    SoundCloud.getUserTracks(SCDATA.me.id, {limit: scope.limit, resolve: 'false', category: this.category.value});
+                }
+                console.log('select cate: ' +  this.category);
+            };
 
             scope.$on('streamComplete', function (e, data) {
-                scope.tracks.push(data.data);
-                scope.$apply();
+                scope.$evalAsync(function() {
+                    scope.tracks.push(data.data);
+                });
+
+//                scope.$apply();
             });
 
             scope.$on('trackResolved', function (e, data) {
-                scope.tracks.push(data.data);
-                scope.$apply();             // External change
+                scope.$evalAsync(function() {
+                    scope.tracks.push(data.data);
+                });
+                console.log('track resolved')
+//                scope.$apply();             // External change
             });
 
             scope.playTrack = function (track) {
@@ -48,26 +81,12 @@ directives.directive('content', function (SoundCloud, $rootScope) {
                      scope.$emit('trackLoad', {track: track, sound: sound});
 //                     scope.$apply();
                 });
-
             };
 
-//            scope.$on('alltracksretrieved', function (e, data) {
-//                scope.tracks.push(data.data);
-////                debugger;
-//                scope.$apply();
-//                console.log('display all favs');
-//            });
-
-            scope.$on('trackListing', function (e, data) {
-                var results = [];
-
-                results = data.data.filter(function(r) {
-                    return r.id !== "undefined";
+            scope.$on('trackListing', function (e, tracks) {
+                scope.$evalAsync(function() {
+                    scope.tracks = scope.tracks.concat(tracks);
                 });
-//debugger;
-                scope.tracks = scope.tracks.concat(results);
-
-                scope.$apply();
             });
 
             scope.$on('notConnected', function(e, data) {

@@ -3,10 +3,20 @@
     <img src="../img/btn-connect-l.png" id="connectBtn">
 </div>
 
-<!--<ul class="tracks" ng-if="!notConnected">-->
-    <!--<li ng-repeat="track in tracks track by track.id" class="embedTrack"><span ng-bind-html="track.oEmbed.html"></span></li>-->
-<!--</ul>-->
+<!--<label for="contentType">Category</label>-->
 
-<ul class="tracks" ng-if="!notConnected">
-    <li ng-repeat="track in tracks"><a ng-if="track.streamable" ng-click="playTrack(track)">{{track.title}}</span></li>
-</ul>
+<div class="fast-track" ng-if="!notConnected">
+    <select ng-model="category"
+            ng-options="opt as opt.label for opt in options"
+            ng-change="selectAction()">
+    </select>
+
+    <!--<ul class="tracks" ng-if="!notConnected">-->
+    <!--<li ng-repeat="track in tracks track by track.id" class="embedTrack"><span ng-bind-html="track.oEmbed.html"></span></li>-->
+    <!--</ul>-->
+
+    <input type="text" id="search" ng-model="search" placeholder="Search..."/> in {{categorySelected}}
+    <ul class="tracks">
+        <li ng-repeat="track in tracks | filter:search track by track.id"><a ng-if="track.streamable" ng-click="playTrack(track)">{{track.title}}</span></li>
+    </ul>
+</div>

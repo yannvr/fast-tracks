@@ -7,6 +7,11 @@ ul {
 .trackView {
   overflow-y: hidden;
 }
+.player {
+  position: fixed;
+  width: 100%;
+  bottom: -10px;
+}
 .tracks {
   height: 85vh;
   display: -webkit-flex;
