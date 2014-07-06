@@ -19,41 +19,46 @@ directives.directive('content', function (SoundCloud, $rootScope) {
             scope.notConnected = false;
             var SCDATA = {};
 
-            scope.options = [
+            scope.playlistOptions = [
                 { label: 'My likes', value: 'favorites' },
                 { label: 'My tracks', value: 'tracks' },
                 { label: 'Stream', value: 'stream' }
             ];
 
-            scope.category = scope.options[1];
+            scope.limitOptions = [
+                { label: 'No limit', value: Infinity},
+                { label: '100', value: 100 },
+                { label: '50', value: 50 },
+                { label: '10', value: 10 }
+            ];
+
+            scope.playlist = scope.playlistOptions[0];
+            scope.maxTracks = scope.limitOptions[0];
 
             scope.$on('SCinitComplete', function (e, data) {
                 SCDATA.me = data.data;
-                if (scope.category.value === 'stream') {
+                if (scope.playlist.value === 'stream') {
                     SoundCloud.getAllFollowings().then(function () {
                         SoundCloud.getLastFollowingsTracks();
                     })
-                } else if (scope.category.value === 'tracks') {
-                    SoundCloud.getUserTracks(SCDATA.me.id, {limit: scope.limit, resolve: 'true', category: scope.category.value});
-                } else if (scope.category.value === 'favorites') {
-                    SoundCloud.getUserTracks(SCDATA.me.id, {limit: scope.limit, resolve: 'false', category: scope.category.value});
+                } else if (scope.playlist.value === 'tracks') {
+                    SoundCloud.getUserTracks(SCDATA.me.id, {limit: scope.limit, resolve: 'true', playlist: scope.playlist.value});
+                } else if (scope.playlist.value === 'favorites') {
+                    SoundCloud.getUserTracks(SCDATA.me.id, {limit: scope.limit, resolve: 'false', playlist: scope.playlist.value});
                 }
             });
             
-            scope.selectAction = function() {
-    //                scope.category = this.category.value;
-    //                scope.type = this.category.value;
+            scope.setPlaylist = function() {
                 scope.tracks = [];
-                if (this.category.value === 'stream') {
+                if (this.playlist.value === 'stream') {
                     SoundCloud.getAllFollowings().then(function () {
                         SoundCloud.getLastFollowingsTracks();
                     })
-                } else if (this.category.value === 'tracks') {
-                    SoundCloud.getUserTracks(SCDATA.me.id, {limit: 'nolimit', resolve: 'false', category: this.category.value});
-                } else if (this.category.value === 'favorites') {
-                    SoundCloud.getUserTracks(SCDATA.me.id, {limit: scope.limit, resolve: 'false', category: this.category.value});
+                } else if (this.playlist.value === 'tracks') {
+                    SoundCloud.getUserTracks(SCDATA.me.id, {limit: 'nolimit', resolve: 'false', playlist: this.playlist.value});
+                } else if (this.playlist.value === 'favorites') {
+                    SoundCloud.getUserTracks(SCDATA.me.id, {limit: scope.limit, resolve: 'false', playlist: this.playlist.value});
                 }
-                console.log('select cate: ' +  this.category);
             };
 
             scope.$on('streamComplete', function (e, data) {
@@ -85,8 +90,8 @@ directives.directive('content', function (SoundCloud, $rootScope) {
             scope.$on('notConnected', function(e, data) {
                 scope.notConnected = true;
                 scope.$apply();
-                elt[0].querySelector('#connectBtn').addEventListener('click', function(e) {
-                SoundCloud.connect();
+                elt[0].querySelector('#connectBtn').addEventListener('click', function (e) {
+                    SoundCloud.connect();
                 });
             });
 

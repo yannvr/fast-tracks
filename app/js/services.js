@@ -4,7 +4,7 @@
 
 var SCService = angular.module('fastTracks.services', []).
     constant('SCAppConfig', {CLIENT_ID: '658e6daa1a76c7f3cb7f0b495a6830db',
-        REDIRECT_URI: 'http://2.221.195.103/home.html'});
+        REDIRECT_URI: 'http://90.212.239.122/home.html'});
 //  value('version', '0.1').
 
 SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConfig', function ($http, $rootScope, $q, $sce, SCAppConfig) {
@@ -159,7 +159,7 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConf
             limit = 200;
             params.nbTracks = params.nbTracks || 0;
             params.tracksCollected = params.tracksCollected || [];
-            if(params.category === 'favorites') {
+            if(params.playlist === 'favorites') {
                 count = SCData.me.public_favorites_count;
             } else {
                 count = SCData.me.track_count;
@@ -175,7 +175,7 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConf
             $rootScope.$broadcast('trackViewClass', 'compact');
         }
 
-        url = '/users/' + UserId + '/' + params.category;
+        url = '/users/' + UserId + '/' + params.playlist;
         SC.get(url, {limit: limit, offset: offset}, function (response) {
             if (response.errors) {
                 deferred.reject(new Error(response.errors));
@@ -183,8 +183,8 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConf
                 params.nbTracks += response.length;
                 if (params.limit === 'nolimit' && params.nbTracks < count) {
 
-                    that.getUserTracks(UserId, {limit: 'nolimit', resolve: resolve, category: params.category, offset: params.nbTracks, nbTracks: params.nbTracks, tracksCollected: tracksCollected});
-                    if (params.category === 'favorites') {
+                    that.getUserTracks(UserId, {limit: 'nolimit', resolve: resolve, playlist: params.playlist, offset: params.nbTracks, nbTracks: params.nbTracks, tracksCollected: tracksCollected});
+                    if (params.playlist === 'favorites') {
                         // Remove duplicates since SoundCloud allows for them =(
                         var uniqueArray = that.removeDuplicates(response, tracksCollected);
                         tracksCollected = tracksCollected.concat(uniqueArray);

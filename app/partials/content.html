@@ -6,18 +6,21 @@
 <!--<label for="contentType">Category</label>-->
 
 <div class="fast-track" ng-if="!notConnected">
-    <select ng-model="category"
-            ng-options="opt as opt.label for opt in options"
-            ng-change="selectAction()">
+    <label for="playlist">Playlist</label>
+    <select id="playlist"
+            ng-model="playlist"
+            ng-options="opt as opt.label for opt in playlistOptions"
+            ng-change="setPlaylist()">
+    </select>
+    <label for="limit">Limit</label>
+    <select id="limit"
+            ng-model="maxTracks"
+            ng-options="opt as opt.label for opt in limitOptions">
     </select>
 
-    <!--<ul class="tracks" ng-if="!notConnected">-->
-    <!--<li ng-repeat="track in tracks track by track.id" class="embedTrack"><span ng-bind-html="track.oEmbed.html"></span></li>-->
-    <!--</ul>-->
-
     <input type="text" id="search" ng-model="search" placeholder="Search..."/>
-    <ul class="tracks">
-        <li ng-repeat="track in tracks | filter:search track by track.id">
+    <ul class="tracks"> limit: {{maxTracks}}
+        <li ng-repeat="track in tracks | filter:search | limitTo:maxTracks.value track by track.id">
             <span ng-bind-html="track.oEmbed.html" ng-if=" trackViewClass == 'wide' "></span>
             <a ng-if="track.streamable" ng-click="playTrack(track)">{{track.title}}</a>
         </li>
