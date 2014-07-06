@@ -19,7 +19,7 @@
     </select>
 
     <input type="text" id="search" ng-model="search" placeholder="Search..."/>
-    <ul class="tracks"> limit: {{maxTracks}}
+    <ul class="tracks">
         <li ng-repeat="track in tracks | filter:search | limitTo:maxTracks.value track by track.id">
             <span ng-bind-html="track.oEmbed.html" ng-if=" trackViewClass == 'wide' "></span>
             <a ng-if="track.streamable" ng-click="playTrack(track)">{{track.title}}</a>

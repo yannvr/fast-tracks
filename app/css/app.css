@@ -1,6 +1,17 @@
 ul {
   list-style: none;
 }
+.connect {
+  margin: 0 auto;
+  left: 30%;
+  top: 50%;
+  transform: translateY(-50%);
+  -webkit-transform: translateY(-50%);
+  position: absolute;
+}
+.connectBtn {
+  cursor: pointer;
+}
 .trackView {
   overflow-y: hidden;
 }
@@ -27,26 +38,26 @@ ul {
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-.compact .tracks {
+.nolimit .tracks {
   height: 85vh;
   margin: 0;
 }
-.compact .tracks li {
+.nolimit .tracks li {
   width: 20%;
   flex: none;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-.wide .tracks {
+.10 .tracks {
   height: 95vh;
   margin: 10px 0;
 }
-.wide .tracks li {
+.10 .tracks li {
   width: 100%;
   flex: 1 1;
   margin: 0.1em 0;
 }
-.wide .player {
+.10 .player {
   display: none;
 }
