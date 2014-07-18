@@ -4,7 +4,7 @@
 
 var SCService = angular.module('fastTracks.services', []).
     constant('SCAppConfig', {CLIENT_ID: '658e6daa1a76c7f3cb7f0b495a6830db',
-        REDIRECT_URI: 'http://90.212.239.122/home.html'});
+        REDIRECT_URI: 'http://2.218.201.101/home.html'});
 //  value('version', '0.1').
 
 SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConfig', function ($http, $rootScope, $q, $sce, SCAppConfig) {
@@ -168,11 +168,8 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConf
             limit = params.limit || 100;
         }
 
-        if (count <= 10) {
+        if (count <= 10 || params.resolve) {
             resolve = true;
-            $rootScope.$broadcast('trackViewClass', 'wide');
-        } else {
-            $rootScope.$broadcast('trackViewClass', 'compact');
         }
 
         url = '/users/' + UserId + '/' + params.playlist;

@@ -39,6 +39,7 @@ ul {
   li {
     border-bottom: 1px solid moccasin;
     .text-overflow();
+
   }
 }
 
@@ -57,7 +58,7 @@ ul {
 
 
 //wide views for less than 10 tracks, they will all be resolved
-.10 {
+.wide {
   .tracks {
     height: 95vh;
     margin: 10px 0;
@@ -67,5 +68,8 @@ ul {
       margin: 0.1em 0;
     }
   }
+  a { display: none; }
   .player { display: none; }
 }
+
+.compact li { width: 30%; span { display: none} }

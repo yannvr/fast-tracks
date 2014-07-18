@@ -17,7 +17,9 @@ directives.directive('content', function (SoundCloud, $rootScope) {
             scope.tracks = [];
             scope.sound = undefined;
             scope.notConnected = false;
-            var SCDATA = {};
+            var SCDATA = {},
+                limitClassnames = {'No limit': 'compact', 100: 'compact', 50: 'compact', 10: 'wide'};
+//                limitClassnames = {'No limit': 'nolimit', '100': 100, '50': 50, '10': 10};
 
             scope.playlistOptions = [
                 { label: 'My likes', value: 'favorites' },
@@ -27,7 +29,7 @@ directives.directive('content', function (SoundCloud, $rootScope) {
 
             scope.limitOptions = [
                 { label: 'No limit', value: Infinity},
-                { label: '100', value: 100 },
+                { label: '100', value: 100},
                 { label: '50', value: 50 },
                 { label: '10', value: 10 }
             ];
@@ -42,9 +44,9 @@ directives.directive('content', function (SoundCloud, $rootScope) {
                         SoundCloud.getLastFollowingsTracks();
                     })
                 } else if (scope.playlist.value === 'tracks') {
-                    SoundCloud.getUserTracks(SCDATA.me.id, {limit: scope.limit, resolve: 'true', playlist: scope.playlist.value});
+                    SoundCloud.getUserTracks(SCDATA.me.id, {limit: 'nolimit', resolve: true, playlist: scope.playlist.value});
                 } else if (scope.playlist.value === 'favorites') {
-                    SoundCloud.getUserTracks(SCDATA.me.id, {limit: scope.limit, resolve: 'false', playlist: scope.playlist.value});
+                    SoundCloud.getUserTracks(SCDATA.me.id, {limit: 'nolimit', playlist: scope.playlist.value});
                 }
             });
             
@@ -55,10 +57,20 @@ directives.directive('content', function (SoundCloud, $rootScope) {
                         SoundCloud.getLastFollowingsTracks();
                     })
                 } else if (this.playlist.value === 'tracks') {
-                    SoundCloud.getUserTracks(SCDATA.me.id, {limit: 'nolimit', resolve: 'false', playlist: this.playlist.value});
+                    SoundCloud.getUserTracks(SCDATA.me.id, {limit: 'nolimit',  playlist: this.playlist.value});
                 } else if (this.playlist.value === 'favorites') {
-                    SoundCloud.getUserTracks(SCDATA.me.id, {limit: scope.limit, resolve: 'false', playlist: this.playlist.value});
+                    SoundCloud.getUserTracks(SCDATA.me.id, {limit: 'nolimit', playlist: this.playlist.value});
                 }
+            };
+
+            scope.setLimit = function() {
+                $rootScope.trackViewClass = limitClassnames[this.maxTracks.value];
+//                scope.trackViewClass = limitClassnames[this.maxTracks];
+                if (this.maxTracks.value === 10) {
+//                    scope.tracks = [];
+                    SoundCloud.getUserTracks(SCDATA.me.id, {limit: 10, resolve: true, playlist: scope.playlist.value});
+                }
+                console.log('trackViewClass class set to ' + $rootScope.trackViewClass);
             };
 
             scope.$on('streamComplete', function (e, data) {
@@ -101,13 +113,13 @@ directives.directive('content', function (SoundCloud, $rootScope) {
                 });
             });
 
-            scope.$on('trackViewClass', function (e, trackViewClass) {
-                $rootScope.$evalAsync(function() {
-                    $rootScope.trackViewClass = trackViewClass;
-                    scope.trackViewClass = trackViewClass;
-                    console.log('trackViewClass class set to ' + trackViewClass);
-                });
-            });
+//            scope.$on('trackViewClass', function (e, trackViewClass) {
+//                $rootScope.$evalAsync(function() {
+//                    $rootScope.trackViewClass = trackViewClass;
+////                    scope.trackViewClass = trackViewClass;
+//                    console.log('trackViewClass class set to ' + trackViewClass);
+//                });
+//            });
         }
 
     }
