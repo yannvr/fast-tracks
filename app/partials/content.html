@@ -18,13 +18,42 @@
             ng-options="opt as opt.label for opt in limitOptions"
             ng-change="setLimit()">
     </select>
+    <button ng-click="refresh()">Refresh</button>
 
     <input type="text" id="search" ng-model="search" placeholder="Search..."/>
+
     <ul class="tracks">
-        <li ng-repeat="track in tracks | filter:search | limitTo:maxTracks.value track by track.id" ng-class="track.id">
-           <!--TODO: Track directive that include cached version of embedded track -->
-            <span ng-bind-html="track.oEmbed.html"></span>
-            <a ng-if="track.streamable" ng-click="playTrack(track)">{{track.title}}</a>
+        <li class="mytracks" ng-show="playlist.value == 'tracks'" ng-hide="playlist.value != 'tracks'">
+            <ul>
+                <li ng-repeat="track in playlistTracks.tracks | filter:search | limitTo:maxTracks.value track by track.id"
+                    ng-class="track.id">
+                    <!--TODO: Track directive that include cached version of embedded track -->
+                    <span ng-bind-html="track.oEmbed.html"></span>
+                    <a ng-if="track.streamable" ng-click="playTrack(track)">{{track.title}}</a>
+                </li>
+            </ul>
+        </li>
+        <li class="stream" ng-show="playlist.value == 'stream'" ng-hide="playlist.value != 'stream'">
+            <ul>
+                <li ng-repeat="track in playlistTracks.stream | filter:search | limitTo:maxTracks.value track by track.id"
+                    ng-class="track.id">
+                    <!--TODO: Track directive that include cached version of embedded track -->
+                    <span ng-bind-html="track.oEmbed.html"></span>
+                    <a ng-if="track.streamable" ng-click="playTrack(track)">{{track.title}}</a>
+                </li>
+            </ul>
+        </li>
+        <li class="favorites" ng-show="playlist.value == 'favorites'" ng-hide="playlist.value != 'favorites'">
+            <ul>
+                <li ng-repeat="track in playlistTracks.favorites | filter:search | limitTo:maxTracks.value track by track.id"
+                    ng-class="track.id">
+                    <!--TODO: Track directive that include cached version of embedded track -->
+                    <span ng-bind-html="track.oEmbed.html"></span>
+                    <a ng-if="track.streamable" ng-click="playTrack(track)">{{track.title}}</a>
+                </li>
+            </ul>
         </li>
     </ul>
+
+
 </div>

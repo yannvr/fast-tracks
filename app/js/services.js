@@ -4,7 +4,7 @@
 
 var SCService = angular.module('fastTracks.services', []).
     constant('SCAppConfig', {CLIENT_ID: '658e6daa1a76c7f3cb7f0b495a6830db',
-        REDIRECT_URI: 'http://2.218.201.101/home.html'});
+        REDIRECT_URI: 'http://90.200.112.173/home.html'});
 //  value('version', '0.1').
 
 SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConfig', function ($http, $rootScope, $q, $sce, SCAppConfig) {
@@ -58,6 +58,7 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConf
 
         var fromDate = moment().subtract('days', 1).toISOString(),
             toDate = new Date(Date.now()).toISOString();
+
         if (!SCData.followings) {
             SCData.followingsTracks = [];
             that.getFollowings().
@@ -65,6 +66,9 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConf
                     SCData.followings = results;
 
                     SCData.followings.forEach(function (following) {
+                        if (SCData.interrupt) {
+                            return false;
+                        }
                         var url = '/users/' + following.id + '/tracks';
 
                         SC.get(url, { 'created_at[from]': fromDate, 'created_at[to]': toDate}, function (response) {
@@ -80,6 +84,9 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConf
             return SCData.followingsTracks;
         } else {
             SCData.followings.forEach(function (following) {
+                if (SCData.interrupt) {
+                    return false;
+                }
                 if (indexs.followings.tracksRequested.indexOf(following.id) === -1) {
                     var url = '/users/' + following.id + '/tracks';
                     SC.get(url, { 'created_at[from]': fromDate, 'created_at[to]': toDate}, function (response) {
@@ -92,7 +99,7 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConf
                                     track.oEmbed.html = $sce.trustAsHtml(oEmbed.html);
                                     if (i === response.length - 1) {
                                         SCData.followingsTracks = SCData.followingsTracks.concat(track);
-                                        $rootScope.$broadcast('streamComplete', {data: track});
+                                        $rootScope.$broadcast('streamTracksCollected', track);
                                     }
                                 });
                             });
@@ -202,7 +209,7 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConf
             }
         });
 
-        return deferred.promise;
+        return deferred;
     };
 
     this.getFollowings = function () {
