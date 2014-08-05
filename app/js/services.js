@@ -4,7 +4,7 @@
 
 var SCService = angular.module('fastTracks.services', []).
     constant('SCAppConfig', {CLIENT_ID: '658e6daa1a76c7f3cb7f0b495a6830db',
-        REDIRECT_URI: 'http://90.200.112.173/home.html'});
+        REDIRECT_URI: 'http://46.208.151.81/home.html'});
 //  value('version', '0.1').
 
 SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConfig', function ($http, $rootScope, $q, $sce, SCAppConfig) {
