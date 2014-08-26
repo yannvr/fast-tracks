@@ -23,7 +23,7 @@
     <input type="text" id="search" ng-model="search" placeholder="Search..."/>
 
     <ul class="tracks">
-        <li class="mytracks" ng-show="playlist.value == 'tracks'" ng-hide="playlist.value != 'tracks'">
+        <li class="mytracks" ng-hide="playlist.value != 'tracks'">
             <ul>
                 <li ng-repeat="track in playlistTracks.tracks | filter:search | limitTo:maxTracks.value track by track.id"
                     ng-class="track.id">
@@ -33,7 +33,7 @@
                 </li>
             </ul>
         </li>
-        <li class="stream" ng-show="playlist.value == 'stream'" ng-hide="playlist.value != 'stream'">
+        <li class="stream" ng-hide="playlist.value != 'stream'">
             <ul>
                 <li ng-repeat="track in playlistTracks.stream | filter:search | limitTo:maxTracks.value track by track.id"
                     ng-class="track.id">
@@ -43,7 +43,7 @@
                 </li>
             </ul>
         </li>
-        <li class="favorites" ng-show="playlist.value == 'favorites'" ng-hide="playlist.value != 'favorites'">
+        <li class="favorites" ng-hide="playlist.value != 'favorites'">
             <ul>
                 <li ng-repeat="track in playlistTracks.favorites | filter:search | limitTo:maxTracks.value track by track.id"
                     ng-class="track.id">

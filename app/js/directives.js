@@ -33,41 +33,43 @@ directives.directive('content', function (SoundCloud, $rootScope) {
 
             scope.playlist = scope.playlistOptions[1];
             scope.maxTracks = scope.limitOptions[0];
+            var playListName = scope.playlist.value;
 
             scope.$on('SCinitComplete', function (e, data) {
                 var resolve = false;
                 SoundCloud.SCData.me = data.data;
-                if (scope.playlist.value === 'stream') {        //TODO: Medium view
+                if (playListName === 'stream') {        //TODO: Medium view
                     SoundCloud.getAllFollowings().then(function () {
-                         SoundCloud.getLastFollowingsTracks();
+                        SoundCloud.getLastFollowingsTracks();
                     })
-                } else if (scope.playlist.value === 'tracks') {
+                } else if (playListName === 'tracks') {
                     if (SoundCloud.SCData.me.public_favorites_count <= 10) {
                         resolve = true;
                     }
-                     SoundCloud.getUserTracks(SoundCloud.SCData.me.id, {limit: 'nolimit', resolve: resolve, playlist: scope.playlist.value});
-                } else if (scope.playlist.value === 'favorites') {
+                    SoundCloud.getUserTracks(SoundCloud.SCData.me.id, {limit: 'nolimit', resolve: resolve, playlist: playListName});
+                } else if (playListName === 'favorites') {
                     if (SoundCloud.SCData.me.track_count <= 10) {
                         resolve = true;
                     }
-                     SoundCloud.getUserTracks(SoundCloud.SCData.me.id, {limit: 'nolimit', resolve: resolve, playlist: scope.playlist.value});
+                    SoundCloud.getUserTracks(SoundCloud.SCData.me.id, {limit: 'nolimit', resolve: resolve, playlist: playListName});
                 }
             });
 
             scope.refresh = function () {
-                scope.playlistTracks[scope.playlist] = [];
+                scope.playlistTracks[playListName] = [];
+                setTrackViewClass();
+            };
+
+            scope.isCurrentPlaylist = function(playlist) {
+                return playListName === playlist;
             };
 
             scope.setPlaylist = function () {
-                scope.playlist.value = this.playlist.value;
+                playListName = this.playlist.value;
 
-                if (!scope.playlistTracks[scope.playlist.value]) {
-                    scope.playlistTracks[scope.playlist.value] = [];
-                } else if (scope.playlistTracks[scope.playlist.value].length > 0) {
-//                    scope.$apply(function() {
-//                        scope.tracks = scope.playlistTracks[scope.playlist.value];
-//                    });
-
+                if (!scope.playlistTracks[playListName]) {
+                    scope.playlistTracks[playListName] = [];
+                } else if (scope.playlistTracks[playListName].length > 0) {
                     return true;
                 }
 
@@ -82,60 +84,59 @@ directives.directive('content', function (SoundCloud, $rootScope) {
                 }
             };
 
-/*            scope.setLimit = function() {
-                $rootScope.trackViewClass = limitClassnames[this.maxTracks.value];
-                if (this.maxTracks.value === 10) {
-                    SoundCloud.getUserTracks(SoundCloud.SCData.me.id, {limit: 10, resolve: true, playlist: scope.playlist.value});
+            function setTrackViewClass(className) {
+                if (className) {
+                    $rootScope.trackViewClass = className;
+                } else {
+                    if (playListName === 'favorites' && SoundCloud.SCData.me && SoundCloud.SCData.me.public_favorites_count <= 10 ||
+                        playListName === 'tracks' && SoundCloud.SCData.me && SoundCloud.SCData.me.track_count <= 10) {
+                        $rootScope.trackViewClass = 'wide';
+                    } else if (scope.playlistTracks[playListName].length && scope.playlistTracks[playListName].length <= 10) {
+                        $rootScope.trackViewClass = 'wide';
+                    } else {
+                        $rootScope.trackViewClass = 'compact';
+                    }
                 }
-                console.log('trackViewClass class set to ' + $rootScope.trackViewClass);
-            };*/
 
-//            scope.$watch('playlistTracks[playlist.value]', function () {
-//                console.log("NB Tracks: " + scope.playlistTracks[scope.playlist.value].length + ' on: ' + scope.playlist.value);
-//            });
+            }
 
             scope.$watch('playlist.value', function () {
-
-                if(scope.playlist.value === 'favorites' && SoundCloud.SCData.me && SoundCloud.SCData.me.public_favorites_count <= 10 ||
-                    scope.playlist.value === 'tracks' && SoundCloud.SCData.me && SoundCloud.SCData.me.track_count <= 10 ||
-                    scope.playlistTracks[scope.playlist.value].length <= 10) {
-                    $rootScope.trackViewClass = 'wide';
-                } else {
-                    $rootScope.trackViewClass = 'compact';
-                }
+                setTrackViewClass();
             });
 
             scope.$on('streamTracksCollected', function (e, tracks) {
-
-                scope.$evalAsync(function() {
-                    scope.playlistTracks[scope.playlist.value] = scope.playlistTracks[scope.playlist.value].concat(tracks);
+                setTrackViewClass('wide');
+                scope.$evalAsync(function () {
+                    scope.playlistTracks[playListName] = scope.playlistTracks[playListName].concat(tracks);
                 });
             });
 
             scope.$on('trackResolved', function (e, track) {
-//                scope.playlistTracks[scope.playlist.value].push(track);
+//                scope.playlistTracks[playListName].push(track);
+                setTrackViewClass('wide');
 
-                scope.$evalAsync(function() {
-                    scope.playlistTracks[scope.playlist.value] = scope.playlistTracks[scope.playlist.value].concat(track);
+                scope.$evalAsync(function () {
+                    scope.playlistTracks[playListName] = scope.playlistTracks[playListName].concat(track);
                 });
             });
 
             scope.playTrack = function (track) {
-                 SoundCloud.playStream(track.id).then(function(sound) {
-                     scope.sound = sound;
-                     console.log('got sound ' + sound);
-                     scope.$emit('trackLoad', {track: track, sound: sound});
+                SoundCloud.playStream(track.id).then(function (sound) {
+                    scope.sound = sound;
+                    console.log('got sound ' + sound);
+                    scope.$emit('trackLoad', {track: track, sound: sound});
                 });
             };
 
             scope.$on('trackListing', function (e, tracks) {
 
-                scope.$evalAsync(function() {
-                    scope.playlistTracks[scope.playlist.value] = scope.playlistTracks[scope.playlist.value].concat(tracks);
+                scope.$evalAsync(function () {
+                    scope.playlistTracks[playListName] = scope.playlistTracks[playListName].concat(tracks);
                 });
+                setTrackViewClass();
             });
 
-            scope.$on('notConnected', function(e, data) {
+            scope.$on('notConnected', function (e, data) {
                 scope.notConnected = true;
                 scope.$apply();
                 elt[0].querySelector('#connectBtn').addEventListener('click', function (e) {
@@ -144,7 +145,7 @@ directives.directive('content', function (SoundCloud, $rootScope) {
             });
 
             scope.$on('connected', function (e, data) {
-                scope.$evalAsync(function() {
+                scope.$evalAsync(function () {
                     scope.notConnected = false;
                 });
             });
@@ -160,14 +161,14 @@ directives.directive('content', function (SoundCloud, $rootScope) {
 
     }
 }).
-    directive('player', function(SoundCloud) {
+    directive('player', function (SoundCloud) {
         return {
             restrict: 'AE',
             template: '<div class="player" ng-bind-html="track.oEmbed.html"></div>',
-            link: function(scope, elem, attrs) {
+            link: function (scope, elem, attrs) {
                 scope.$on('trackLoad', function (e, data) {
                     scope.track = data.track;
-                    SoundCloud.getEmbed(data.track, { auto_play: false, comments:false, maxheight: 120  }).then(function (oEmbed) {
+                    SoundCloud.getEmbed(data.track, { auto_play: false, comments: false, maxheight: 120  }).then(function (oEmbed) {
                         scope.track.oEmbed = oEmbed;
                     });
                 })
