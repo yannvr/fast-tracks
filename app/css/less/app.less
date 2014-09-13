@@ -24,7 +24,7 @@ ul {
   bottom: -10px;
 }
 
-.tracks {
+.trackView ul {
   height: 85vh;
   margin: 0;
   display: -webkit-flex;
@@ -43,9 +43,19 @@ ul {
   }
 }
 
+.wide {
+  & > ul { display: block;}
+    li {
+      width: auto;
+    }
+    li li {
+      width: 10%;
+  }
+}
+
 //Most compact view, meant to list as much as possible on a screen
 .nolimit {
-  .tracks {
+  .trackView {
     height: 85vh;
     margin: 0;
     li {
@@ -57,19 +67,34 @@ ul {
 }
 
 
-//wide views for less than 10 tracks, they will all be resolved
+//wide views for less than 10 trackView, they will all be resolved
 .wide {
-  .tracks {
     height: 95vh;
     margin: 10px 0;
-    li li {
+  ul {
+    display: block;}  
+  li li {
       width: 100%;
       flex: 1 1;
       margin: 0.1em 0;
     }
-  }
 //  a { display: none; }
   .player { display: none; }
 }
 
-.compact li { width: 30%; span { display: none } }
+.compact {
+  .trackView { padding: 0 }
+  li li {
+    width: 30%;
+    span {
+      display: none
+    }
+  }
+}
+
+.vertical {
+  li li {
+    width: 10%;
+    float: left;
+  }
+}

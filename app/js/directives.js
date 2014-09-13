@@ -2,6 +2,9 @@
 
 /* Directives */
 
+//TODO Fix player madness :)
+// Do Loader
+
 var directives = angular.module('fastTracks.directives', []);
 
 directives.directive('content', function (SoundCloud, $rootScope) {
@@ -33,6 +36,7 @@ directives.directive('content', function (SoundCloud, $rootScope) {
 
             scope.playlist = scope.playlistOptions[1];
             scope.maxTracks = scope.limitOptions[0];
+            scope.trackViewClass = 'wide';
             var playListName = scope.playlist.value;
 
             scope.$on('SCinitComplete', function (e, data) {
@@ -67,6 +71,7 @@ directives.directive('content', function (SoundCloud, $rootScope) {
             scope.setPlaylist = function () {
                 playListName = this.playlist.value;
 
+                setTrackViewClass(playListName);
                 if (!scope.playlistTracks[playListName]) {
                     scope.playlistTracks[playListName] = [];
                 } else if (scope.playlistTracks[playListName].length > 0) {
@@ -76,7 +81,7 @@ directives.directive('content', function (SoundCloud, $rootScope) {
                 if (this.playlist.value === 'stream') {
                     SoundCloud.getAllFollowings().then(function () {
                         SoundCloud.getLastFollowingsTracks();
-                    })
+                    });
                 } else if (this.playlist.value === 'tracks') {
                     SoundCloud.getUserTracks(SoundCloud.SCData.me.id, {limit: 'nolimit', playlist: this.playlist.value});
                 } else if (this.playlist.value === 'favorites') {
@@ -84,37 +89,27 @@ directives.directive('content', function (SoundCloud, $rootScope) {
                 }
             };
 
-            function setTrackViewClass(className) {
-                if (className) {
-                    $rootScope.trackViewClass = className;
-                } else {
-                    if (playListName === 'favorites' && SoundCloud.SCData.me && SoundCloud.SCData.me.public_favorites_count <= 10 ||
-                        playListName === 'tracks' && SoundCloud.SCData.me && SoundCloud.SCData.me.track_count <= 10) {
-                        $rootScope.trackViewClass = 'wide';
-                    } else if (scope.playlistTracks[playListName].length && scope.playlistTracks[playListName].length <= 10) {
-                        $rootScope.trackViewClass = 'wide';
-                    } else {
-                        $rootScope.trackViewClass = 'compact';
-                    }
-                }
+            function setTrackViewClass(playListName) {
+                $rootScope.trackViewClass = '';
 
+                if (playListName == 'stream') {
+                    $rootScope.trackViewClass = 'wide vertical';
+                } else if (playListName === 'favorites' && SoundCloud.SCData.me && SoundCloud.SCData.me.public_favorites_count <= 10 ||
+                    playListName === 'tracks' && SoundCloud.SCData.me && SoundCloud.SCData.me.track_count <= 10 ||
+                    scope.playlistTracks[playListName] && scope.playlistTracks[playListName].length && scope.playlistTracks[playListName].length <= 10) {
+                    $rootScope.trackViewClass = 'wide';
+                } else {
+                    $rootScope.trackViewClass = 'compact';
+                }
             }
 
-            scope.$watch('playlist.value', function () {
-                setTrackViewClass();
-            });
-
             scope.$on('streamTracksCollected', function (e, tracks) {
-                setTrackViewClass('wide');
                 scope.$evalAsync(function () {
                     scope.playlistTracks[playListName] = scope.playlistTracks[playListName].concat(tracks);
                 });
             });
 
             scope.$on('trackResolved', function (e, track) {
-//                scope.playlistTracks[playListName].push(track);
-                setTrackViewClass('wide');
-
                 scope.$evalAsync(function () {
                     scope.playlistTracks[playListName] = scope.playlistTracks[playListName].concat(track);
                 });
@@ -133,7 +128,6 @@ directives.directive('content', function (SoundCloud, $rootScope) {
                 scope.$evalAsync(function () {
                     scope.playlistTracks[playListName] = scope.playlistTracks[playListName].concat(tracks);
                 });
-                setTrackViewClass();
             });
 
             scope.$on('notConnected', function (e, data) {
