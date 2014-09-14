@@ -4,7 +4,7 @@
 
 var SCService = angular.module('fastTracks.services', []).
     constant('SCAppConfig', {CLIENT_ID: '658e6daa1a76c7f3cb7f0b495a6830db',
-        REDIRECT_URI: 'http://46.208.151.81/home.html'});
+        REDIRECT_URI: 'http://46.208.170.134/home.html'});
 //  value('version', '0.1').
 
 SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConfig', function ($http, $rootScope, $q, $sce, SCAppConfig) {
@@ -142,14 +142,14 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConf
      * @param http://developers.soundcloud.com/docs/api/reference#oembed
      * @returns {promise}
      */
-    this.getEmbed = function (track, oEmbedParams) {
+    this.getEmbed = function (track, oEmbedParams, playList) {
         var deferred = $q.defer();
 
 //        tracks.forEach(function(track) {
             SC.oEmbed(track.permalink_url, oEmbedParams, function (oEmbed) {
                 track.oEmbed = oEmbed;
                 track.oEmbed.html = $sce.trustAsHtml(oEmbed.html);
-                $rootScope.$broadcast('trackResolved', track);
+                $rootScope.$broadcast('trackResolved', track, playList);
             });   
 //        });
 
@@ -192,9 +192,9 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConf
                         // Remove duplicates since SoundCloud allows for them =(
                         var uniqueArray = that.removeDuplicates(response, tracksCollected);
                         tracksCollected = tracksCollected.concat(uniqueArray);
-                        $rootScope.$broadcast('trackListing', uniqueArray);
+                        $rootScope.$broadcast('trackListing', uniqueArray, params.playlist);
                     } else {
-                        $rootScope.$broadcast('trackListing', response);
+                        $rootScope.$broadcast('trackListing', response, params.playlist);
                     }
                 } else {
                     tracksCollected = [];
@@ -203,7 +203,7 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConf
 //                Small number of results resolved automatically
                 if (resolve) {
                     response.forEach(function(track) {
-                        that.getEmbed(track, { auto_play: false, comments:false, maxheight: 140  })
+                        that.getEmbed(track, { auto_play: false, comments:false, maxheight: 140  }, params.playlist)
                     });
                 }
             }
