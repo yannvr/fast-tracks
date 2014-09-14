@@ -45,11 +45,11 @@
         </li>
         <li class="favorites" ng-hide="playlist.value != 'favorites'">
             <ul>
-                <li ng-repeat="track in playlistTracks.favorites | filter:search | limitTo:maxTracks.value track by track.id"
-                    ng-class="track.id">
+                <li bindonce ng-repeat="track in playlistTracks.favorites | filter:search | limitTo:maxTracks.value track by track.id"
+                    bo-class="track.id">
                     <!--TODO: Track directive that include cached version of embedded track -->
-                    <span ng-bind-html="track.oEmbed.html"></span>
-                    <a ng-if="track.streamable" ng-click="playTrack(track)">{{track.title}}</a>
+                    <span bo-bind-html="track.oEmbed.html"></span>
+                    <a bo-if="track.streamable" ng-click="playTrack(track)" bo-html="track.title"></a>
                 </li>
             </ul>
         </li>

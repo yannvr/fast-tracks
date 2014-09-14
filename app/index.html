@@ -14,14 +14,6 @@
 </head>
 <body>
 
-  <!--[if lt IE 7]>
-      <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
-  <![endif]-->
-
-
-  <!--<content type="stream"></content>-->
-  <!--<content type="mytracks" limit="5"></content>-->
-
 
   <div class="trackView">
       <content type="myfavourites" limit="nolimit" resolve="false" ng-class="trackViewClass"></content>
@@ -40,6 +32,7 @@
   <script src="bower_components/angular/angular.js"></script>
   <script src="bower_components/localforage/dist/localforage.js"></script>
   <!--<script src="bower_components/angular-route/angular-route.js"></script>-->
+  <script src="bower_components/angular-bindonce/bindonce.js"></script>
   <script src="js/app.js"></script>
   <script src="js/services.js"></script>
   <script src="js/controllers.js"></script>
