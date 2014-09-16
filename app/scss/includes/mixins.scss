@@ -1,4 +1,4 @@
-.text-overflow() {
+@mixin text-overflow() {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;

@@ -1,4 +1,4 @@
-@import "mixins.less";
+@import "includes/mixins";
 
 ul {
   list-style: none;
@@ -9,7 +9,7 @@ ul {
   left: 30%;
   top: 50%;
   transform: translateY(-50%);
-  -webkit-transform: translateY(-50%);
+//  -webkit-transform: translateY(-50%);
   position: absolute;
 }
 
@@ -36,9 +36,10 @@ ul {
   -webkit-align-content: stretch;
   align-content: stretch;
 
+
   li {
-    border-bottom: 1px solid moccasin;
-    .text-overflow();
+    /*border-bottom: 1px solid moccasin; */
+    @include text-overflow();
 
   }
 }
@@ -61,7 +62,7 @@ ul {
     li {
       width: 20%;
       flex: none;
-      .text-overflow();
+      @include text-overflow();
     }
   }
 }
