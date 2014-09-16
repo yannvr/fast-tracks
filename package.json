@@ -26,6 +26,7 @@
   },
   "scripts": {
     "prestart": "npm install",
+    "node": "sudo node server.js",
     "start": "sudo http-server app -a 192.168.1.66 -p 80",
     "pretest": "npm install",
     "test": "karma start test/karma.conf.js",
