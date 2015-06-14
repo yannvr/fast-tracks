@@ -17,6 +17,7 @@ directives.directive('content', function (SoundCloud, $rootScope) {
             resolve: '@'  // Maximum number of tracks to retrieve
         },
         link: function (scope, elt, attrs) {
+            var connectButton = elt[0].querySelector('#connectBtn');
             scope.playlistTracks = {favorites: [], tracks: [], stream: []};
             scope.sound = undefined;
             scope.notConnected = false;
@@ -72,19 +73,11 @@ directives.directive('content', function (SoundCloud, $rootScope) {
                 });
             });
 
-            scope.$on('notConnected', function () {
-                scope.notConnected = true;
-                scope.$apply();
-                elt[0].querySelector('#connectBtn').addEventListener('click', function (e) {
-                    SoundCloud.connect();
-                });
-            });
-
-            scope.$on('connected', function () {
-                scope.$evalAsync(function () {
-                    scope.notConnected = false;
-                });
-            });
+            if(connectButton) {
+                connectButton.addEventListener('click', function (e) {
+                        SoundCloud.connect();
+                    });
+            }
 
             scope.playTrack = function (track) {
                 SoundCloud.playStream(track.id).then(function (sound) {

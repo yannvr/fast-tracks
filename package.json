@@ -8,7 +8,7 @@
   "devDependencies": {
     "body-parser": "~1.0.0",
     "bower": "*",
-    "browser-sync": "^1.4.0",
+    "browser-sync": "latest",
     "cookie-parser": "~1.0.1",
     "debug": "~0.7.4",
     "express": "~3.4.8",
@@ -26,8 +26,7 @@
   },
   "scripts": {
     "prestart": "npm install",
-    "node": "sudo node server.js",
-    "start": "sudo http-server app -a 192.168.1.66 -p 80",
+    "start": "sudo http-server app",
     "pretest": "npm install",
     "test": "karma start test/karma.conf.js",
     "test-single-run": "karma start test/karma.conf.js  --single-run",

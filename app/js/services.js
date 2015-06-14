@@ -4,7 +4,7 @@
 
 var SCService = angular.module('fastTracks.services', []).
     constant('SCAppConfig', {CLIENT_ID: '658e6daa1a76c7f3cb7f0b495a6830db',
-        REDIRECT_URI: 'http://81.174.203.3/home.html'});
+        REDIRECT_URI: 'http://127.0.0.1:3000'});
 //  value('version', '0.1').
 
 SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConfig', function ($http, $rootScope, $q, $sce, SCAppConfig) {
@@ -21,27 +21,7 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConf
             });
         };
 
-    this.startApp = function () {
-        this.init();
-        localforage.getItem('accessToken').then(function (token) {
-            if (!token) {
-                $rootScope.$broadcast('notConnected');
-            } else {
-                $rootScope.$broadcast('connected');
-                var url = 'https://api.soundcloud.com/me.json?oauth_token=' + token;
-                $http({method: 'GET', url: url}).
-                    success(function (data, status, headers, config) {
-                        SCData.me = data;
-                        $rootScope.$broadcast('SCinitComplete', {data: data});
-                    }).
-                    error(function (data, status, headers, config) {
-                        console.error("failed to get: " + url)
-                    });
-            }
-        });
-    };
-
-    this.init = function () {
+    this.startApp= function () {
         SC.initialize({
             client_id: SCAppConfig.CLIENT_ID,
             redirect_uri: SCAppConfig.REDIRECT_URI
@@ -263,9 +243,9 @@ SCService.factory('SoundCloud', ['$http', '$rootScope', '$q', '$sce', 'SCAppConf
     };
 
     this.connect = function () {
-        SC.connect(function () {
+        SC.connect(function (token) {
             SC.get('/me', function (me) {
-                alert('Hello, ' + me.username);
+                console.log('Hello, ' + me.username);
             });
         });
     };

@@ -8,6 +8,7 @@
   "dependencies": {
     "angular-bindonce": "latest",
     "localforage": "latest",
+    "jquery": "latest",
     "angular": "latest",
     "moment": "~2.7.x"
   }

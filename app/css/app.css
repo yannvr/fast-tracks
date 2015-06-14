@@ -1,26 +1,29 @@
+body {
+  color: darkblue;
+  font-size: 23px; }
+
 ul {
-  list-style: none;
-}
+  list-style: none; }
+
 .connect {
   margin: 0 auto;
   left: 30%;
   top: 50%;
   transform: translateY(-50%);
-  -webkit-transform: translateY(-50%);
-  position: absolute;
-}
+  position: absolute; }
+
 .connectBtn {
-  cursor: pointer;
-}
+  cursor: pointer; }
+
 .trackView {
-  overflow-y: hidden;
-}
+  overflow-y: hidden; }
+
 .player {
   position: fixed;
   width: 100%;
-  bottom: -10px;
-}
-.tracks {
+  bottom: -10px; }
+
+.trackView ul {
   height: 85vh;
   margin: 0;
   display: -webkit-flex;
@@ -30,34 +33,51 @@ ul {
   -webkit-flex-flow: column wrap;
   flex-flow: column wrap;
   -webkit-align-content: stretch;
-  align-content: stretch;
-}
-.tracks li {
-  border-bottom: 1px solid moccasin;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-.nolimit .tracks {
+  align-content: stretch; }
+  .trackView ul li {
+    border-bottom: 1px solid moccasin;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis; }
+
+.wide > ul {
+  display: block; }
+.wide li {
+  width: auto; }
+.wide li li {
+  width: 10%; }
+
+.nolimit .trackView {
   height: 85vh;
-  margin: 0;
-}
-.nolimit .tracks li {
-  width: 20%;
-  flex: none;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-.10 .tracks {
+  margin: 0; }
+  .nolimit .trackView li {
+    width: 20%;
+    flex: none;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis; }
+
+.wide {
   height: 95vh;
-  margin: 10px 0;
-}
-.10 .tracks li {
-  width: 100%;
-  flex: 1 1;
-  margin: 0.1em 0;
-}
-.10 .player {
-  display: none;
-}
+  margin: 10px 0; }
+  .wide ul {
+    display: block; }
+  .wide li li {
+    width: 100%;
+    flex: 1 1;
+    margin: 0.1em 0; }
+  .wide .player {
+    display: none; }
+
+.compact {
+  font-size: 25px; }
+  .compact .trackView {
+    padding: 0; }
+  .compact li li {
+    width: 30%; }
+    .compact li li span {
+      display: none; }
+
+.vertical li li {
+  width: 10%;
+  float: left; }
