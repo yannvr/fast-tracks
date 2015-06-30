@@ -5,6 +5,10 @@
 angular.module('fastTracks.controllers', ['pasvaz.bindonce'])
   .controller('FastTrackController', function(SoundCloud, $scope, $rootScope, $http) {
 
+        if(location.href.indexOf('localhost')> -1 ) {
+            location.href = 'http://127.0.0.1:3000';
+        }
+
         var accessToken = window.location.hash.split('&')[0].split('=')[1];
         if (accessToken) {
             localforage.setItem('accessToken', accessToken).then(function() { window.close() });
