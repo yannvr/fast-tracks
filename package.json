@@ -10,7 +10,7 @@
     "bower": "*",
     "browser-sync": "latest",
     "cookie-parser": "~1.0.1",
-    "debug": "~0.7.4",
+    "debug": ">=2.6.9",
     "express": "latest",
     "gulp": "^3.8.8",
     "gulp-autoprefixer": "^1.0.0",
